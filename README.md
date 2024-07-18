@@ -34,6 +34,10 @@ Testing and Troubleshooting:
 
 Test the setup by leaving a machine idle for the specified duration to verify auto-logout functionality.
 Review logs (/tmp/com.denison.autologout.out and /tmp/com.denison.autologout.err) for any issues.
+
+
+
+
 **Notes**
 Idle Time: Adjust the idle time threshold (900 seconds by default, equals 15 minutes) in auto_logout_check.sh as per your lab's requirements.
 Customization: Modify the scripts according to specific needs, such as changing the warning message or adding additional checks.
