@@ -59,12 +59,12 @@ display_logout_warning() {
     result=$?
 
     if [[ "$result" == "0" ]]; then
-        echo "force_quit_all_apps_and_logout"
+        force_quit_all_apps_and_logout
     elif [[ "$result" == "2" ]];  then
         echo "User canceled logout."
         exit 0
     elif [[ "$result" == "4" ]]; then
-        echo "force_quit_all_apps_and_logout"
+        force_quit_all_apps_and_logout
     fi
 }
 

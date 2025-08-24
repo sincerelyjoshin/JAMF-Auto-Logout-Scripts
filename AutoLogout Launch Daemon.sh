@@ -1,32 +1,39 @@
-﻿#!/bin/bash
+#!/bin/bash
 
-cat << EOF > /Library/LaunchDaemons/com.denison.autologout.plist
+# Define variables
+daemonLabel="com.denison.autologout"                  # Unique launchd identifier
+jamfEvent="autologout"                                # Jamf Pro policy event
+runInterval="600"                                     # Frequency, in seconds
+
+cat << EOF > /Library/LaunchDaemons/"${daemonLabel}".plist
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0.dtd">
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
   <key>Label</key>
-  <string>com.denison.autologout</string>
+  <string>$daemonLabel</string>
   <key>ProgramArguments</key>
   <array>
     <string>/usr/local/bin/jamf</string>
     <string>policy</string>
     <string>-event</string>
-    <string>autologout</string>
+    <string>$jamfEvent</string>
   </array>
   <key>StartInterval</key>
-  <integer>600</integer>
+  <integer>$runInterval</integer>
   <key>RunAtLoad</key>
   <true/>
   <key>StandardOutPath</key>
-  <string>/tmp/com.denison.autologout.out</string>
+  <string>/tmp/$daemonLabel.out</string>
   <key>StandardErrorPath</key>
-  <string>/tmp/com.denison.autologout.err</string>
+  <string>/tmp/$daemonLabel.err</string>
 </dict>
 </plist>
 EOF
 
-sudo chmod 755 /Library/LaunchDaemons/com.denison.autologout.plist
-sudo chown root:wheel /Library/LaunchDaemons/com.denison.autologout.plist
-/bin/launchctl load /Library/LaunchDaemons/com.denison.autologout.plist
-sudo pmset -a sleep 0
+chmod 755 /Library/LaunchDaemons/"${daemonLabel}".plist
+chown root:wheel /Library/LaunchDaemons/"${daemonLabel}".plist
+launchctl load /Library/LaunchDaemons/"${daemonLabel}".plist
+pmset -a sleep 0
+
+exit 0
