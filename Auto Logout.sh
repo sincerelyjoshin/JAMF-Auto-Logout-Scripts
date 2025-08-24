@@ -1,4 +1,12 @@
-﻿#!/bin/bash
+#!/bin/bash
+
+# Define variables
+swiftDialogPath="/usr/local/bin/dialog"                                                                 # location of swiftDialog
+jamfHelperPath="/Library/Application Support/JAMF/bin/jamfHelper.app/Contents/MacOS/jamfHelper"         # location of jamfHelper
+windowTitle="Idle Logout Warning"                                                                       # window title text
+windowMessage="You have been idle for a while. The computer is signing you out."                        # window message text
+windowIcon="/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/AlertNoteIcon.icns"        # window icon
+windowTimeout=20                                                                                        # window timeout in seconds
 
 # Exit if no users are logged in
 if [ -z "$(who)" ]; then
@@ -41,19 +49,22 @@ is_screen_locked() {
 }
 
 display_logout_warning() {
-    jamfHelperPath="/Library/Application Support/JAMF/bin/jamfHelper.app/Contents/MacOS/jamfHelper"
-    message="You have been idle for a while. The computer is signing you out."
-    timeout=20
-    icon="/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/AlertNoteIcon.icns"
+    # draw window using swiftDialog if installed, otherwise draw window with jamfHelper
+    if [ -n "${swiftDialogPath}" ] && [ -e "${swiftDialogPath}" ]; then
+        window=$( "$swiftDialogPath" --title "$windowTitle" --message "$windowMessage" --button1text "Confirm" --button2 --timer "$windowTimeout" --icon  "$windowIcon" --ontop --showonallscreens )
+    else
+        window=$( "$jamfHelperPath" -windowType utility -title "$windowTitle" -description "$windowMessage" -button1 "Confirm" -button2 "Cancel" -timeout "$windowTimeout" -countdown -icon "$windowIcon" -defaultButton 1 -cancelButton 2)
+    fi
 
-    button=$( "$jamfHelperPath" -windowType utility -title "Idle Logout Warning" -description "$message" -button1 "Cancel" -button2 "Logout" -timeout "$timeout" -countdown -icon "$icon" -defaultButton 2 -cancelButton 1)
-echo "$button"
+    result=$?
 
-    if [[ "$button" == "0" ]]; then
+    if [[ "$result" == "0" ]]; then
+        echo "force_quit_all_apps_and_logout"
+    elif [[ "$result" == "2" ]];  then
         echo "User canceled logout."
         exit 0
-	elif [[ "$button" == "2" ]];  then
-        force_quit_all_apps_and_logout
+    elif [[ "$result" == "4" ]]; then
+        echo "force_quit_all_apps_and_logout"
     fi
 }
 
